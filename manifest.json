@@ -1,0 +1,21 @@
+{
+  "manifest_version": 2,
+  "name": "Hello World!",
+  "description": "This extension shows a Hello World message!",
+  "version": "1.0",
+  "permissions": ["activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "browser_action": {
+    "default_icon": "dbit.png",
+    "default_popup": "window.html"
+  }
+}
