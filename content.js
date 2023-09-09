@@ -10,6 +10,7 @@ function hideImages() {
   });
 }
 
+
 // Call the hideImages function immediately when the content script runs
 hideImages();
 
