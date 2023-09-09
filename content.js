@@ -1,5 +1,19 @@
 // content.js
 console.log("hello jasmit ");
+
+// Define a function to hide images
+function hideImages() {
+  const images = document.querySelectorAll('img'); // Select all <img> elements
+
+  images.forEach((image) => {
+    image.style.display = 'none'; // Hide the image by setting its display property to 'none'
+  });
+}
+
+// Call the hideImages function immediately when the content script runs
+hideImages();
+
+
 // Get all the image elements on the page
 const imageElements = document.getElementsByTagName("img");
 
@@ -11,39 +25,15 @@ for (let i = 0; i < imageElements.length; i++) {
   const imageUrl = imageElements[i].src;
   imageUrls.push(imageUrl);
 }
+// fetch()
 
 // Now you can do whatever you want with the extracted image URLs
 console.log(imageUrls);
+
+// Create a JSON object containing the image URLs
+const data = { imageUrls };
+
+// Send a POST request to your Flask server
+
 // content.js
 
-// Listen for a message from the background script
-// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-//     if (message.action === "blockImages") {
-//       if (message.flag === 1) {
-//         // Select all image elements and set their 'src' attribute to an empty value
-//         const imageElements = document.getElementsByTagName("img");
-//         for (let i = 0; i < imageElements.length; i++) {
-//           imageElements[i].src = "";
-//         }
-//       }
-//     }
-//   });
-// content.js
-
-// Listen for a message from the background script
-// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-//     if (message.action === "blockPageLoad" && message.flag === 1) {
-//       // Stop the page from loading
-//       window.stop();
-//     }
-//   });
-// content.js
-
-// let shouldBlockLoad = false;
-
-// Listen for a message from the background script
-// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-//   if (message.action === "setLoadFlag") {
-//     shouldBlockLoad = message.flag === 1;
-//   }
-// });
