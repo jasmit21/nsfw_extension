@@ -1,45 +1,3 @@
-// // content.js
-// console.log("Welcome to SafeBrowse ");
-// // Get all the image elements on the page
-// const imageElements = document.getElementsByTagName("img");
-
-// // Create an array to store the image URLs
-// const imageUrls = [];
-
-
-
-// // Loop through the image elements and extract their src attributes
-// for (let i = 0; i < imageElements.length; i++) {
-//   const imageUrl = imageElements[i].src;
-
-//   imageUrls.push(imageUrl);
-// }
-
-// // Now you can do whatever you want with the extracted image URLs
-// console.log(imageUrls);
-// // content.js
-
-// // Make an HTTP POST request to the /generate_caption route
-// for (let i = 0; i < imageUrls.length; i++) {
-//   fetch('http://127.0.0.1:5000/generate_caption', {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json'
-//     },
-//     body: JSON.stringify({ image_url: imageUrls[i] }) // Send the current image URL
-//   })
-//     .then(response => response.json())
-//     .then(data => {
-//       console.log("Response for image " + i + ":");
-//       console.log('Response from /generate_caption:', data);
-//       // You can access the generated caption in data.caption and print it
-//     })
-//     .catch(error => {
-//       console.error('Error for image ' + i + ':', error);
-//     });
-// }
-// content.js
-
 // Function to extract image URLs from the page
 console.log("hoga ??");
 function extractImageUrls() {
@@ -48,10 +6,12 @@ function extractImageUrls() {
 }
 
 // Function to hide all images on the page
-function hideImages() {
+function hideImageByUrl(imageUrl) {
   const images = document.querySelectorAll("img");
   images.forEach((img) => {
-    img.style.display = "none";
+    if (img.src === imageUrl) {
+      img.style.display = "none";
+    }
   });
 }
 
@@ -68,23 +28,41 @@ function showImages(imageUrls) {
 
 // Extract image URLs from the page and hide the images
 const imageUrls = extractImageUrls();
-hideImages();
+// hideImages();
 console.log(imageUrls);
-// Make an HTTP POST request to the server to fetch responses
-fetch("http://127.0.0.1:5000/generate_captions", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({ image_urls: imageUrls }),
-})
-  .then((response) => response.json())
-  .then((data) => {
-    console.log("Response from server:", data);
-    // Assuming the server's response is an array of image URLs to display
-    showImages(data.imageUrls);
+
+// Make an HTTP POST request to the /generate_caption route
+for (let i = 0; i < imageUrls.length; i++) {
+  fetch('http://127.0.0.1:5000/generate_caption', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ image_url: imageUrls[i] }) // Send the current image URL
   })
-  .catch((error) => {
-    console.error("Error:", error);
-  });
-  // showImages(imageUrls);
+    .then(response => response.json())
+    .then(data => {
+      console.log("Response for image " + i + ":");
+      console.log('Response from /generate_caption:', data);
+
+      // Find the category with the highest score
+      let maxScore = -1;
+      let maxCategory = '';
+      for (let j = 0; j < data.labels.length; j++) {
+        if (data.scores[j] > maxScore) {
+            maxScore = data.scores[j];
+            maxCategory = data.labels[j];
+            }
+          }
+      
+      console.log('Highest scoring category for image ' + i + ':', maxCategory, 'with score:', maxScore);
+      if(maxCategory == 'Sexually explicit'){
+        hideImageByUrl(imageUrls[i]);
+      }
+      
+      // You can access the generated caption in data.caption and print it
+    })
+    .catch(error => {
+      console.error('Error for image ' + i + ':', error);
+    });
+}
