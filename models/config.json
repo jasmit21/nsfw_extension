@@ -3,7 +3,6 @@
   "architectures": [
     "GitForCausalLM"
   ],
-  
   "attention_probs_dropout_prob": 0.1,
   "bos_token_id": 101,
   "classifier_dropout": null,

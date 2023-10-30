@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "Hello World!",
+  "name": "SafeBrowse",
   "description": "This extension shows a Hello World message!",
   "version": "1.0",
   "permissions": [

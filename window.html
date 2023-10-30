@@ -1,11 +1,44 @@
+<!-- <!DOCTYPE html>
+<html>
+  <head>
+    <script src="background.js"></script>
+  </head>
+  <body>
+    <div>Hello !!</div>
+    <div>This is a Chrome Extension!</div>
+    <div>And this is some html</div>
+  </body>
+</html> -->
 <!DOCTYPE html>
 <html>
 <head>
-<script src="background.js"></script>
+    <script src="background.js"></script>
 </head>
-<body>
-<div>Hello !!</div>
-<div>This is a Chrome Extension!</div>
-<div>And this is some html</div>
+<body style="background-color: azure;">
+    <h3>Welcome to SafeBrowse</h3>
+    <form id="categoryForm">
+        <label for="violent"><input type="checkbox" id="violent" name="categories" value="violent"> Violent</label>
+        <br>
+        <label for="sexually_explicit"><input type="checkbox" id="sexually_explicit" name="categories" value="sexually_explicit"> Sexually explicit</label>
+        <br>
+        <input type="submit" value="Submit">
+    </form>
+
+    <script>
+        document.getElementById('categoryForm').addEventListener('submit', function (e) {
+            e.preventDefault(); // Prevent the default form submission
+            const selectedCategories = [];
+            const checkboxes = document.getElementsByName('categories');
+
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    selectedCategories.push(checkboxes[i].value);
+                }
+            }
+
+            // Store the selectedCategories array in a global variable
+            window.selectedCategories = selectedCategories;
+        });
+    </script>
 </body>
-</html>
+</html> 
