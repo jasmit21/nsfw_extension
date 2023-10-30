@@ -13,11 +13,9 @@ CORS(app)
 # Path to the directory containing the model files
 model_folder_path = r'C:\Users\ravit\OneDrive\Documents\nsfw_filter\nsfw_extension\models'
 zsc_model_path = r'C:\Users\ravit\OneDrive\Documents\nsfw_filter\nsfw_extension\zscmodel'
-candidate_labels = ["Violent", "Neutral", "Sexually explicit"]
-
+candidate_labels = ["Violent", "Neutral", "Sexually explicit" ]
 
 # Load the tokenizer and model from the folder
-
 
 @app.route('/generate_caption', methods=['POST'])
 def generate_caption():
@@ -41,7 +39,6 @@ def generate_caption():
         output = classifier(generated_caption, candidate_labels, multi_label=False)
         print(output)
         
-
         return output
     except Exception as e:
         return jsonify({'error': str(e)}), 400
