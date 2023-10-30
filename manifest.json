@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "SafeBrowse",
-  "description": "This extension shows a Hello World message!",
+  "description": "This extension blocks nsfw content!",
   "version": "1.0",
   "permissions": [
     "activeTab",
