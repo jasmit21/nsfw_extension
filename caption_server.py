@@ -1,38 +1,49 @@
-from flask import Flask, request, jsonify
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from transformers import pipeline
 from PIL import Image
 import requests
 from io import BytesIO
-from flask_cors import CORS
+import uvicorn
+from fastapi import FastAPI, Request
 
-app = Flask(__name__)
-CORS(app, resources={r"/generate_caption_and_classify": {"origins": "*"}})
-CORS(app)
+app = FastAPI()
+
+# CORS setup
+origins = ["*"] # or specify domains
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Initialize the BLIP model for image captioning
 blip_model_name = "Salesforce/blip-image-captioning-large"
 blip_pipeline = pipeline("image-to-text", model=blip_model_name)
 
-# URL of the classification server
-classification_server_url = 'http://localhost:5001/classify_text'
+classification_server_url = 'http://localhost:8001/classify_text'
 
-@app.route('/generate_caption_and_classify', methods=['POST'])
-def generate_caption_and_classify():
+@app.post("/generate_caption_and_classify")
+async def generate_caption_and_classify(request: Request):
     try:
-        image_urls = request.json.get('image_urls', [])
+        body = await request.json()
+        image_urls = body.get('image_urls', [])
         results = []
 
-        for image_url in image_urls:
+        for index, image_url in enumerate(image_urls):
             response = requests.get(image_url)
             image = Image.open(BytesIO(response.content))
-            caption = blip_pipeline(image)[0]['generated_text']
+            caption = blip_pipeline(image, max_new_tokens=50)[0]['generated_text']
+            print(f"Caption generated for image {index + 1}/{len(image_urls)}.")
 
-            # Send caption to classification server
             classification_response = requests.post(
                 classification_server_url,
                 json={"texts": [caption]}
             )
             classification_result = classification_response.json()[0]
+            print(f"Image {index + 1}/{len(image_urls)} classified successfully.")
 
             results.append({
                 "image_url": image_url,
@@ -40,9 +51,10 @@ def generate_caption_and_classify():
                 "classification": classification_result
             })
 
-        return jsonify(results)
+        return results
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        raise HTTPException(status_code=500, detail=str(e))
 
-if __name__ == '__main__':
-    app.run(port=5000)
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
