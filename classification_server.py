@@ -1,33 +1,40 @@
-from flask import Flask, request, jsonify
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from transformers import pipeline
-from flask_cors import CORS
+from fastapi import FastAPI, Request
+import uvicorn
 
-app = Flask(__name__)
-CORS(app, resources={r"/generate_caption": {"origins": "https://www.google.com"}})
-CORS(app)
+app = FastAPI()
 
-# Load the BERT model using pipeline for zero-shot classification
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://www.google.com"],  # or specify other origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 classifier = pipeline("zero-shot-classification", model="MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli")
 
-@app.route('/classify_text', methods=['POST'])
-def classify_text():
+@app.post("/classify_text")
+async def classify_text(request: Request):
     try:
-        data = request.json
-        texts = data.get('texts', [])
-        labels = data.get('labels', ["Violent", "Neutral", "Sexually explicit"])
+        body = await request.json()
+        texts = body.get('texts', [])
+        labels = body.get('labels', ["Violent", "Neutral", "Sexually explicit"])
         results = []
 
         for text in texts:
-            result = classifier(text, labels)
+            result = classifier(text, labels , max_new_tokens=50)
             results.append({
-                "text": text, 
-                "category": result["labels"][0],  # The top label
-                "scores": result["scores"][0]  # The score for the top label
+                "text": text,
+                "category": result["labels"][0],
+                "scores": result["scores"][0]
             })
 
-        return jsonify(results)
+        return results
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        raise HTTPException(status_code=500, detail=str(e))
 
-if __name__ == '__main__':
-    app.run(port=5001)
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8001)
