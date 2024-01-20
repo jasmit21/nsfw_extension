@@ -1,19 +1,17 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from transformers import pipeline
-from transformers import AutoProcessor, AutoModelForCausalLM, AutoTokenizer
 import requests
 from PIL import Image
 from decouple import config
-
+from io import BytesIO
 app = Flask(__name__)
 CORS(app, resources={r"/generate_caption": {"origins": "https://www.google.com"}})
 CORS(app)
 
-model_folder_path = config('MODEL_FOLDER_PATH')
-zsc_model_path = config('ZSC_MODEL_PATH')
-
-candidate_labels = ["Violent", "Neutral", "Sexually explicit"]
+# Initialize the pipeline for image captioning
+model_name = config('BLIP_MODEL_NAME', default="Salesforce/blip-image-captioning-large")
+pipe = pipeline("image-to-text", model=model_name)
 
 @app.route('/generate_caption', methods=['POST'])
 def generate_caption():
@@ -22,37 +20,26 @@ def generate_caption():
         image_urls = request.json.get('image_urls')
         results = []
 
-        tokenizer = AutoTokenizer.from_pretrained(model_folder_path)
-        model = AutoModelForCausalLM.from_pretrained(model_folder_path)
-        processor = AutoProcessor.from_pretrained(model_folder_path)
-        
         for image_url in image_urls:
-            image = Image.open(requests.get(image_url, stream=True).raw)
-            pixel_values = processor(images=image, return_tensors="pt").pixel_values
+            # Load the image from the URL
+            response = requests.get(image_url)
+            image = Image.open(BytesIO(response.content))
 
-            generated_ids = model.generate(pixel_values=pixel_values, max_length=50)
-            generated_caption = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+            # Use the pipeline to generate the caption
+            generated_caption = pipe(image)[0]['generated_text']
 
-            classifier = pipeline("zero-shot-classification", model=zsc_model_path)
-            output = classifier(generated_caption, candidate_labels, multi_label=False)
-            print("============output============\n")
-            print(output)
-
-            # Create a dictionary with image URL, caption, and score
+            # Create a dictionary with image URL and caption
             result_item = {
                 "image_url": image_url,
-                "caption": output['sequence'],
-                "scores": output['scores'][0],
-                "label": output['labels'][0],
+                "caption": generated_caption
             }
 
             results.append(result_item)
-            # results.append(output)
 
         print("===================results===========")
-        print(results) 
+        print(results)
         return jsonify(results)
-    except Exception as e:      
+    except Exception as e:
         print(e)
         return jsonify({'error': str(e)}), 400
 
