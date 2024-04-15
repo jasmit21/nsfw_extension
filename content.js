@@ -104,27 +104,6 @@ function hideImages() {
 }
 
 
-// Function to show an image based on the server response
-// function showImage(imageUrl, category, score) {
-//   console.log("Showing image:", imageUrl);
-//   if ((category === "Sexually explicit" || category === "Violent") && score > 0.5) {
-//     console.log(`Blocking image with URL: ${imageUrl}`);
-//     // Block or hide the image
-//     const img = document.querySelector(`img[src="${imageUrl}"]`);
-//     if (img) {
-//       img.style.display = "none";
-//     }
-//   } else {
-//     // Show the image since it's safe
-//     const img = document.querySelector(`img[src="${imageUrl}"]`);
-//     console.log("img(inside show images and response): ",img);
-//     if (img) {
-//       console.log("inside if of displaying image");
-//       img.src = imageUrl;
-//       img.style.display = "block";
-//     }
-//   }
-// }
 function findImageBySrc(imageUrl) {
   const images = document.querySelectorAll("img");
   for (let i = 0; i < images.length; i++) {
@@ -144,7 +123,8 @@ function showImage(imageUrl, category, score) {
       const images = document.querySelectorAll("img");
       images.forEach(img => {
         if (img.src === originalSrc) {
-          img.style.visibility = "hidden"; // Hide the image
+          // img.style.visibility = "hidden"; // Hide the image
+          img.src = "https://placehold.jp/20/dedede/433d3d/250x250.png?text=Content%20is%20blocked%20%0Aby%20SafeBrowse";
         }
       });
     }
