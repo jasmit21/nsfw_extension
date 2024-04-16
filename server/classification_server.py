@@ -24,6 +24,7 @@ async def classify_text(request: Request):
         labels = body.get('labels', ["Violent", "Neutral", "Sexually explicit"])
         results = []
 
+        # Classify the selected caption and send response to server
         for text in texts:
             result = classifier(text, labels , max_new_tokens=50)
             results.append({
